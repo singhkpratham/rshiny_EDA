@@ -3,6 +3,7 @@ library(plotly)
 library(ggplot2)
 library(broom)
 library(stringr)
+library('tidyverse')
 # Define server logic required to draw a histogram
 function(input, output, session) {
    
@@ -16,7 +17,7 @@ function(input, output, session) {
    output$title = renderText(input$file$name)
    num = reactive({
      a = file()
-     colnames(a)[sapply(a, function(x) length(unique(x))>20 & is.numeric(x))]
+     colnames(a)[sapply(file(),function(x)length(unique(x))>15 & !is.character(x))]
    })
    
    fac = reactive({
