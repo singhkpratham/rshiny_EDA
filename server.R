@@ -9,15 +9,17 @@ function(input, output, session) {
    
    file = reactive({
      file1 = input$file
-     if (is.null(file1)) return( read.csv("C:\\Users\\kumar.singh\\Desktop\\New folder\\Git\\R-Shiny\\iris.csv"))
-      read.csv(file1$datapath )
+     if (is.null(file1)) return(
+       read.csv("C:\\Users\\kumar.singh\\Desktop\\New folder\\Git\\R-Shiny\\iris.csv"))
+      read.csv(file1$datapath,stringsAsFactors = F )
      
      }
    )
    output$title = renderText(input$file$name)
    num = reactive({
      a = file()
-     colnames(a)[sapply(file(),function(x)length(unique(x))>15 & !is.character(x))]
+     colnames(a)[sapply(file(),function(x)length(unique(x))>15 & !is.character(x) & 
+                          !is.factor(x))]
    })
    
    fac = reactive({
@@ -39,9 +41,11 @@ function(input, output, session) {
 
 
    })
-   output$cattbl = renderTable(
-     tidy(summary(file()[input$q]))[-1]
-   )
+   output$cattbl = renderTable({
+     a = data.frame(table(file()[input$q]))
+     names(a)[1] = input$q
+     a
+   })
 
    output$head = renderDataTable(file(),
                                  options = 
@@ -57,7 +61,7 @@ function(input, output, session) {
    output$uniColor = renderUI({
      a = file()
      tagList(
-       checkboxInput('uni','wanna color by some variable?'),
+       checkboxInput('uni','Color by some Third Variable?'),
        conditionalPanel( 'input.uni == true', 
                          selectizeInput('c', 'Color by',c("None", fac()) , selected = NULL))
      )
@@ -65,7 +69,7 @@ function(input, output, session) {
    
    output$uniplt = renderPlotly({
      a = file()
-     if (input$c == "None"){ ggplotly(
+     if (input$c == "None" | !input$uni){ ggplotly(
        ggplot() + geom_histogram(aes(a[[input$uniSld]]))
        )
      }else{
@@ -76,7 +80,7 @@ function(input, output, session) {
    
    output$unibox = renderPlotly({
      a = file()
-     if(input$c == "None"){
+     if(input$c == "None" ){
        plot_ly(x = a[[input$uniSld]],type = 'box')
      }else{
        plot_ly(x = a[[input$uniSld]], color = a[[input$c]] , type = 'box')
@@ -102,18 +106,24 @@ function(input, output, session) {
    output$biColor = renderUI({
      a = file()
      tagList(
-       checkboxInput('b','wanna color by some variable?'),
+       checkboxInput('b','Color by some Third Variable?'),
        conditionalPanel( 'input.b == true', 
-                         selectizeInput('a', 'Color by',c("None", fac()) , selected = NULL))
+                         selectizeInput('cat_col', 'Categorical',c("None", fac()) , selected = NULL),
+                         selectizeInput('cont_col', 'Continuous',c("None", num()) , selected = NULL))
      )
    })
    
    output$biPlt = renderPlotly({
      a = file()
-     if (input$a == "None") {ggplotly(
+     if (input$cont_col == "None" & input$cat_col == "None"| !input$b) {ggplotly(
        ggplot() + geom_point(aes(x =a[[input$x]] , y = a[[input$y]]) ) 
        )
-     }else{plot_ly(x =a[[input$x]] , y = a[[input$y]], color = a[[input$a]] )}
+     }else if (!input$cat_col == "None"){
+       plot_ly(x =a[[input$x]] , y = a[[input$y]], color = a[[input$cat_col]] )
+     }else if (!input$cont_col == "None"){
+       plot_ly(x =a[[input$x]] , y = a[[input$y]], color = a[[input$cont_col]] )
+     }
+     
      
      })
    ##############################################3

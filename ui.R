@@ -20,7 +20,8 @@ dashboardPage(
         mainPanel(
           tabsetPanel(
             tabPanel('File Upload',
-                     fileInput('file', 'upload dataset')
+                     fileInput('file', 'Upload dataset'),
+                     tags$h6(tags$em('only csv files'))
             ), 
             tabPanel( "Structure and summary",
                       dataTableOutput('head'),
@@ -35,14 +36,14 @@ dashboardPage(
    #                   tableOutput('summary')
                       
             ),
-            tabPanel("univariate" , 
+            tabPanel("Univariate" , 
                      uiOutput('uniSlide'),
                      uiOutput('uniColor'),
                      verbatimTextOutput("uniquant"),
                      fluidRow(plotlyOutput("uniplt"),
                      plotlyOutput('unibox') )
             ),
-            tabPanel('bivariate',
+            tabPanel('Bivariate',
                      uiOutput('biSelect'),
                      uiOutput('biColor'),
                      plotlyOutput('biPlt')
